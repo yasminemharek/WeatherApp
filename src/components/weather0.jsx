@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import WeatherInfo from './weatherInfo';
 
-const Weather = () => {
+const Weather0 = () => {
   const [location, setLocation] = useState('');
   const [weatherData, setWeatherData] = useState(null);
-  const [forecastData, setForecastData] = useState([]);
   const [error, setError] = useState(null);
   const iconUrl = `http://openweathermap.org/img/wn/${weatherData?.weather?.[0].icon}.png`; // Handle potential undefined values
 
@@ -17,15 +15,10 @@ const Weather = () => {
       const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${API_KEY}`);
       setWeatherData(response.data);
       setError(null);
-      
-      // Fetch forecast data after fetching weather data
-      const forecastResponse = await axios.get(`https://api.openweathermap.org/data/2.5/forecast?q=${location}&appid=${API_KEY}`);
-      const dailyForecastData = forecastResponse.data.list.filter((forecast, index) => index % 8 === 0); // Filter out only one forecast entry per day
-      setForecastData(dailyForecastData);
+      console.log(response.data);
     } catch (error) {
       setError('Error fetching weather data. Please try again.');
       setWeatherData(null);
-      setForecastData([]);
     }
   };
 
@@ -56,11 +49,6 @@ const Weather = () => {
       );
       setWeatherData(weatherResponse.data);
       setError(null);
-      
-      // Fetch forecast data after fetching weather data
-      const forecastResponse = await axios.get(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}`);
-      const dailyForecastData = forecastResponse.data.list.filter((forecast, index) => index % 8 === 0); // Filter out only one forecast entry per day
-      setForecastData(dailyForecastData);
     } catch (error) {
       setError('Error fetching location or weather data.');
       console.error(error);
@@ -80,10 +68,17 @@ const Weather = () => {
       </form>
       <button onClick={handleGetUserLocation}>Get My Location Weather</button>
       {error && <p>{error}</p>}
-      {weatherData && <WeatherInfo weatherData={weatherData} />}
-      <WeatherInfo data={forecastData} isForecast />
+      {weatherData && (
+        <div>
+          <h2>Weather in {weatherData.name} 矗</h2> {/* You can add an appropriate city icon here */}
+          <h3> {weatherData.weather[0].main}, <img src={iconUrl} alt="Weather Icon" /></h3>
+          <p>Temperature: {(weatherData.main.temp - 273.15).toFixed(1)}°C </p>
+          <p>Humidity: {weatherData.main.humidity}%</p>
+          <p>Description: {weatherData.weather[0].description}</p>
+        </div>
+      )}
     </div>
   );
 };
 
-export default Weather;
+export default Weather0;
