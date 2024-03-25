@@ -9,7 +9,7 @@ const Weather = () => {
   const [error, setError] = useState(null);
   const iconUrl = `http://openweathermap.org/img/wn/${weatherData?.weather?.[0].icon}.png`; // Handle potential undefined values
 
-  const API_KEY = 'a8f7b232070b1d1b0a7dca00b4f33db3'; // Same API key for both weather and geocoding
+  const API_KEY = 'a8f7b232070b1d1b0a7dca00b4f33db3'; 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,11 +17,14 @@ const Weather = () => {
       const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${API_KEY}`);
       setWeatherData(response.data);
       setError(null);
-      
+
       // Fetch forecast data after fetching weather data
       const forecastResponse = await axios.get(`https://api.openweathermap.org/data/2.5/forecast?q=${location}&appid=${API_KEY}`);
       const dailyForecastData = forecastResponse.data.list.filter((forecast, index) => index % 8 === 0); // Filter out only one forecast entry per day
       setForecastData(dailyForecastData);
+
+      // Log forecast data
+      console.log("Forecast Data:", dailyForecastData);
     } catch (error) {
       setError('Error fetching weather data. Please try again.');
       setWeatherData(null);
@@ -56,21 +59,29 @@ const Weather = () => {
       );
       setWeatherData(weatherResponse.data);
       setError(null);
-      
+
       // Fetch forecast data after fetching weather data
       const forecastResponse = await axios.get(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}`);
       const dailyForecastData = forecastResponse.data.list.filter((forecast, index) => index % 8 === 0); // Filter out only one forecast entry per day
       setForecastData(dailyForecastData);
+
+      // Log forecast data
+      console.log("Forecast Data:", dailyForecastData);
     } catch (error) {
       setError('Error fetching location or weather data.');
       console.error(error);
     }
   };
 
+  useEffect(() => {
+    // Fetch weather data for user's location on initial render
+    handleGetUserLocation();
+  }, []);
+
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <input
+    <div className="flex flex-col justify-center items-center gap-4" >
+      <form onSubmit={handleSubmit} className="flex w-fit h-8 items-center gap-2">
+        <input className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-96 p-1"
           type="text"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
@@ -80,8 +91,8 @@ const Weather = () => {
       </form>
       <button onClick={handleGetUserLocation}>Get My Location Weather</button>
       {error && <p>{error}</p>}
-      {weatherData && <WeatherInfo weatherData={weatherData} />}
-      <WeatherInfo data={forecastData} isForecast />
+      {weatherData && <WeatherInfo data={weatherData} />}
+      {forecastData.length > 0 && <WeatherInfo data={forecastData} isForecast />}
     </div>
   );
 };
